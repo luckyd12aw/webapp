@@ -51,7 +51,7 @@ onMounted(async () => {
 });
 
 async function loadBalance() {
-  const contractAddress = "0x898b64943D01f2739C4B4cFAD4E16579C3228C35";
+  const contractAddress = "0x0CFADaB77eC10CB761E11ed15E99d1e117B25769";
   const provider = new ethers.JsonRpcProvider(
     "https://arbitrum-sepolia.blockpi.network/v1/rpc/public"
   );

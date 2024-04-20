@@ -89,7 +89,7 @@
           <div class="nft-text">LuckyDraw #{{ nftData && currentIndex }}</div>
           <a
             target="_blank"
-            href="https://sepolia.arbiscan.io/address/0x898b64943D01f2739C4B4cFAD4E16579C3228C35"
+            href="https://sepolia.arbiscan.io/address/0x0CFADaB77eC10CB761E11ed15E99d1e117B25769"
           >
             <button class="website-button">
               <svg
@@ -294,7 +294,7 @@ const currentIndex = ref(0);
 const currentBlockNumber = ref(null);
 const secondsSinceUpdate = ref(0); // Tracks seconds since last block update
 
-const contractAddress = "0x898b64943D01f2739C4B4cFAD4E16579C3228C35";
+const contractAddress = "0x0CFADaB77eC10CB761E11ed15E99d1e117B25769";
 const abi = [
   {
     inputs: [],
