@@ -9,7 +9,11 @@
   <!-- nft -->
   <div class="nft-continer">
     <!-- nft-arrow -->
-    <button class="arrow-button">
+    <button
+      class="arrow-button"
+      @click="previousNFT"
+      :class="{ invisible: currentIndex <= 0 }"
+    >
       <svg
         class="arrow-left"
         width="61"
@@ -77,44 +81,56 @@
       <div class="nft-top">
         <div class="nft-price-container">
           <img class="eth-img" src="../assets/eth.png" alt="eth" />
+          <!-- TODO: get price from the contract (OpenSea, etc.) -->
           <div class="nft-price-text">0.1145 ETH</div>
         </div>
         <div class="nft-title-container">
           <img class="arb-img" src="../assets/arb.png" alt="arb" />
-          <div class="nft-text">LuckyDraw #3</div>
-          <button class="website-button">
-            <svg
-              width="25"
-              height="25"
-              viewBox="0 0 25 25"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fill-rule="evenodd"
-                clip-rule="evenodd"
-                d="M3.90625 5.98956H13.3815C13.8129 5.98956 14.1627 5.63979 14.1627 5.20831C14.1627 4.77684 13.8129 4.42706 13.3815 4.42706H3.75C2.97335 4.42706 2.34375 5.05667 2.34375 5.83331V21.25C2.34375 22.0267 2.97335 22.6563 3.75 22.6563H19.1667C19.9433 22.6563 20.5729 22.0267 20.5729 21.25V11.6186C20.5729 11.1871 20.2231 10.8373 19.7917 10.8373C19.3602 10.8373 19.0104 11.1871 19.0104 11.6186V21.0938H3.90625V5.98956Z"
-                fill="white"
-              />
-              <path
-                fill-rule="evenodd"
-                clip-rule="evenodd"
-                d="M22.0137 2.88812C21.8671 2.7416 21.6685 2.6593 21.4612 2.6593H15.8423C15.4109 2.6593 15.0611 3.00907 15.0611 3.44055C15.0611 3.87202 15.4109 4.2218 15.8423 4.2218H19.5751L13.5432 10.2538C13.2381 10.5589 13.2381 11.0536 13.5432 11.3587C13.8482 11.6638 14.3428 11.6638 14.648 11.3587L20.6799 5.32666V9.05942C20.6799 9.49088 21.0297 9.84067 21.4612 9.84067C21.8927 9.84067 22.2424 9.49088 22.2424 9.05942V3.44055C22.2424 3.23335 22.1601 3.03463 22.0137 2.88812Z"
-                fill="white"
-              />
-            </svg>
-          </button>
+          <div class="nft-text">LuckyDraw #{{ nftData && currentIndex }}</div>
+          <a
+            target="_blank"
+            href="https://sepolia.arbiscan.io/address/0x898b64943D01f2739C4B4cFAD4E16579C3228C35"
+          >
+            <button class="website-button">
+              <svg
+                width="25"
+                height="25"
+                viewBox="0 0 25 25"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M3.90625 5.98956H13.3815C13.8129 5.98956 14.1627 5.63979 14.1627 5.20831C14.1627 4.77684 13.8129 4.42706 13.3815 4.42706H3.75C2.97335 4.42706 2.34375 5.05667 2.34375 5.83331V21.25C2.34375 22.0267 2.97335 22.6563 3.75 22.6563H19.1667C19.9433 22.6563 20.5729 22.0267 20.5729 21.25V11.6186C20.5729 11.1871 20.2231 10.8373 19.7917 10.8373C19.3602 10.8373 19.0104 11.1871 19.0104 11.6186V21.0938H3.90625V5.98956Z"
+                  fill="white"
+                />
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M22.0137 2.88812C21.8671 2.7416 21.6685 2.6593 21.4612 2.6593H15.8423C15.4109 2.6593 15.0611 3.00907 15.0611 3.44055C15.0611 3.87202 15.4109 4.2218 15.8423 4.2218H19.5751L13.5432 10.2538C13.2381 10.5589 13.2381 11.0536 13.5432 11.3587C13.8482 11.6638 14.3428 11.6638 14.648 11.3587L20.6799 5.32666V9.05942C20.6799 9.49088 21.0297 9.84067 21.4612 9.84067C21.8927 9.84067 22.2424 9.49088 22.2424 9.05942V3.44055C22.2424 3.23335 22.1601 3.03463 22.0137 2.88812Z"
+                  fill="white"
+                />
+              </svg>
+            </button>
+          </a>
         </div>
+        <!-- TODO: get image from the server -->
         <img class="nft-img" src="../assets/nft.png" alt="nft" />
       </div>
       <!-- mid -->
-      <div class="time-text">24h 05m 12s</div>
+      <div class="time-text">
+        {{ calculateTimeFromBlock(currentNFT.endTime) }}
+      </div>
       <div class="participants-container">
         <div class="participants-text">Participants</div>
-        <div class="participants-text">10,001</div>
+        <div class="participants-text">
+          {{ nftData && currentNFT.candidates && currentNFT.candidates.length }}
+        </div>
       </div>
       <!-- bottom -->
       <div class="nft-info">
+        <!-- TODO: get description from the server -->
         <div class="nft-description-name">Genesis Home #3294</div>
         <div class="nft-description">
           The Genesis Homes is the first collection released by ZTX. Each of the
@@ -124,22 +140,36 @@
         </div>
         <div class="nft-info-wrapper">
           <div class="nft-info-title">Price</div>
-          <div class="nft-info-details">0.001 ETH</div>
+          <div class="nft-info-details">
+            {{ nftData && currentNFT && currentNFT.price }} ETH
+          </div>
         </div>
         <div class="nft-info-wrapper">
           <div class="nft-info-title">Application period</div>
-          <div class="nft-info-details">24.04.15.(Mon) - 24.04.21.(Son)</div>
+          <div class="nft-info-details">
+            {{
+              nftData &&
+              currentNFT &&
+              formatApplicationPeriod(currentNFT.startTime, currentNFT.endTime)
+            }}
+          </div>
         </div>
         <div class="nft-info-wrapper">
           <div class="nft-info-title">Announcement date</div>
-          <div class="nft-info-details">24.04.22.(Tue)</div>
+          <div class="nft-info-details">
+            {{ nftData && currentNFT && formatDate(currentNFT.annTime) }}
+          </div>
         </div>
       </div>
       <!-- top -->
       <button class="apply-button">Apply</button>
     </div>
     <!-- nft-arrow -->
-    <button class="arrow-button">
+    <button
+      class="arrow-button"
+      @click="nextNFT"
+      :class="{ invisible: currentIndex == nftData.length - 1 }"
+    >
       <svg
         class="arrow-right"
         width="63"
@@ -243,9 +273,173 @@
 </template>
   
 <script setup>
+import { ref, computed, onMounted, onUnmounted } from "vue";
+import { ethers } from "ethers";
+
+const nftData = ref([]);
+const currentIndex = ref(0);
+const currentBlockNumber = ref(null);
+const secondsSinceUpdate = ref(0); // Tracks seconds since last block update
+
+// Smart contract settings
+const contractAddress = "0x898b64943D01f2739C4B4cFAD4E16579C3228C35";
+const abi = [
+  {
+    inputs: [],
+    name: "allMetadata",
+    outputs: [
+      {
+        components: [
+          { internalType: "uint256", name: "price", type: "uint256" },
+          { internalType: "uint256", name: "startTime", type: "uint256" },
+          { internalType: "uint256", name: "endTime", type: "uint256" },
+          { internalType: "uint256", name: "annTime", type: "uint256" },
+          { internalType: "address", name: "winner", type: "address" },
+          { internalType: "address[]", name: "candidates", type: "address[]" },
+        ],
+        internalType: "struct Metadata[]",
+        name: "metas",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+];
+
+const provider = new ethers.JsonRpcProvider(
+  "https://arbitrum-sepolia.blockpi.network/v1/rpc/public"
+);
+
+const contract = new ethers.Contract(contractAddress, abi, provider);
+
+const currentNFT = computed(() => {
+  if (
+    nftData.value &&
+    nftData.value.length > 0 &&
+    currentIndex.value >= 0 &&
+    currentIndex.value < nftData.value.length
+  ) {
+    const nft = nftData.value[currentIndex.value];
+    return {
+      price: ethers.formatEther(nft.price),
+      startTime: nft.startTime,
+      endTime: nft.endTime,
+      annTime: nft.annTime,
+      winner: nft.winner,
+      candidates: nft.candidates,
+    };
+  }
+  return {};
+});
+
+const loadNFTData = async () => {
+  try {
+    const data = await contract.allMetadata();
+    if (data.length === 0) {
+      throw new Error("No NFTs found.");
+    }
+    nftData.value = data;
+  } catch (error) {
+    console.error("Failed to load NFT data:", error);
+  }
+};
+
+const nextNFT = () => {
+  if (currentIndex.value < (nftData.value?.length || 0) - 1) {
+    currentIndex.value++;
+  }
+};
+
+const previousNFT = () => {
+  if (currentIndex.value > 0) {
+    currentIndex.value--;
+  }
+};
+
+const updateBlockNumber = async () => {
+  currentBlockNumber.value = await provider.getBlockNumber();
+};
+
+const calculateTimeFromBlock = (blockNumber) => {
+  if (!currentBlockNumber.value || !blockNumber) return "Loading...";
+  const blocksAway = blockNumber - ethers.toBigInt(currentBlockNumber.value);
+  if (blocksAway < 0n) {
+    return `End`;
+  }
+
+  const secondsAway =
+    ethers.toNumber(blocksAway) * 0.2 - secondsSinceUpdate.value;
+  const hours = Math.floor(secondsAway / 3600);
+  const minutes = Math.floor((secondsAway % 3600) / 60);
+  const seconds = Math.floor(secondsAway % 60);
+  return `${hours}h ${minutes}m ${seconds}s`;
+};
+
+const formatDate = (blockNumber) => {
+  if (!currentBlockNumber.value || !blockNumber) return "Loading...";
+  const blocksAway = blockNumber - ethers.toBigInt(currentBlockNumber.value);
+  const secondsAway =
+    ethers.toNumber(blocksAway) * 0.2 - secondsSinceUpdate.value;
+
+  const date = new Date(Date.now() + secondsAway * 1000);
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
+const formatApplicationPeriod = (startBlock, endBlock) => {
+  if (!currentBlockNumber.value || !startBlock || !endBlock)
+    return "Loading...";
+  const startBlockAway = startBlock - ethers.toBigInt(currentBlockNumber.value);
+  const startBlocksecondsAway =
+    ethers.toNumber(startBlockAway) * 0.2 - secondsSinceUpdate.value;
+  const endBlockAway = endBlock - ethers.toBigInt(currentBlockNumber.value);
+  const endBlocksecondsAway =
+    ethers.toNumber(endBlockAway) * 0.2 - secondsSinceUpdate.value;
+
+  const startDate = new Date(Date.now() + startBlocksecondsAway * 1000);
+  const endDate = new Date(Date.now() + endBlocksecondsAway * 1000);
+  return `${startDate.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  })} - ${endDate.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  })}`;
+};
+
+let intervalId;
+onMounted(async () => {
+  await provider.getBlockNumber().then((blockNumber) => {
+    currentBlockNumber.value = blockNumber;
+  });
+  await loadNFTData();
+  currentIndex.value = nftData.value.length - 1;
+
+  intervalId = setInterval(async () => {
+    secondsSinceUpdate.value += 1;
+    if (secondsSinceUpdate.value >= 60) {
+      // Assume block time of roughly 60 seconds for update
+      await updateBlockNumber();
+      secondsSinceUpdate.value = 0;
+    }
+  }, 1000);
+});
+onUnmounted(() => {
+  clearInterval(intervalId);
+});
 </script>
   
 <style>
+.invisible {
+  visibility: hidden;
+}
+
 /* details */
 .details {
   display: flex;
