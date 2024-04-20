@@ -161,7 +161,14 @@
         </div>
       </div>
       <!-- top -->
-      <button class="apply-button">Apply</button>
+      <button
+        class="apply-button"
+        @click="buyNFT"
+        :class="{ disable: currentNFT.endTime < currentBlockNumber }"
+        :disabled="currentNFT.endTime < currentBlockNumber"
+      >
+        {{ applyLoading }}
+      </button>
     </div>
     <!-- nft-arrow -->
     <button
@@ -310,6 +317,19 @@ const abi = [
     stateMutability: "view",
     type: "function",
   },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256",
+      },
+    ],
+    name: "buy",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
 ];
 
 const provider = new ethers.JsonRpcProvider(
@@ -318,6 +338,7 @@ const provider = new ethers.JsonRpcProvider(
 
 const contract = new ethers.Contract(contractAddress, abi, provider);
 
+// NFT Metadata
 const currentNFT = computed(() => {
   if (
     nftData.value &&
@@ -418,6 +439,26 @@ const formatApplicationPeriod = (startBlock, endBlock) => {
   })}`;
 };
 
+// Buy
+const applyLoading = ref("Apply");
+let contractWithSigner;
+
+const buyNFT = async () => {
+  if (contractWithSigner) {
+    applyLoading.value = "Apply 💭";
+    try {
+      const tx = await contractWithSigner.buy(currentIndex.value, {
+        value: ethers.parseEther(currentNFT.value.price),
+      });
+      const res = await tx.wait();
+      console.log(res.hash);
+    } catch (error) {
+      console.error(error);
+    }
+    applyLoading.value = "Apply";
+  }
+};
+
 let intervalId;
 onMounted(async () => {
   await provider.getBlockNumber().then((blockNumber) => {
@@ -429,11 +470,20 @@ onMounted(async () => {
   intervalId = setInterval(async () => {
     secondsSinceUpdate.value += 1;
     if (secondsSinceUpdate.value >= 60) {
+      // Timer
       // Assume block time of roughly 60 seconds for update
       await updateBlockNumber();
       secondsSinceUpdate.value = 0;
+
+      // NFT
+      await loadNFTData();
     }
   }, 1000);
+
+  const providerWithSigner = new ethers.BrowserProvider(window.ethereum);
+  const signer = await providerWithSigner.getSigner();
+  // console.log("Account:", await signer.getAddress());
+  contractWithSigner = new ethers.Contract(contractAddress, abi, signer);
 });
 onUnmounted(() => {
   clearInterval(intervalId);
@@ -443,6 +493,11 @@ onUnmounted(() => {
 <style>
 .invisible {
   visibility: hidden;
+}
+.disable {
+  background-color: #dddddd;
+  color: #999999;
+  cursor: not-allowed;
 }
 
 /* details */
@@ -643,6 +698,10 @@ onUnmounted(() => {
   cursor: pointer;
 
   margin: 20px 0px;
+}
+.apply-button.disable {
+  background: #aaaaaa;
+  cursor: not-allowed;
 }
 
 /* arrow */
