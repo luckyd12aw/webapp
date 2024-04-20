@@ -81,8 +81,8 @@
       <div class="nft-top">
         <div class="nft-price-container">
           <img class="eth-img" src="../assets/eth.png" alt="eth" />
-          <!-- TODO: get price from the contract (OpenSea, etc.) -->
-          <div class="nft-price-text">0.1145 ETH</div>
+          <!-- get price from the json file -->
+          <div class="nft-price-text">{{ currentDescription.price }} ETH</div>
         </div>
         <div class="nft-title-container">
           <img class="arb-img" src="../assets/arb.png" alt="arb" />
@@ -130,13 +130,12 @@
       </div>
       <!-- bottom -->
       <div class="nft-info">
-        <!-- TODO: get description from the server -->
-        <div class="nft-description-name">Genesis Home #3294</div>
+        <!-- get description from the json file -->
+        <div class="nft-description-name">
+          Genesis Home {{ currentDescription.id }}
+        </div>
         <div class="nft-description">
-          The Genesis Homes is the first collection released by ZTX. Each of the
-          4,000 unique NFTs is a fully immersive and customizable in-game asset
-          and grants membership to one of four District sub-DAOs of the ZTX
-          community. Find your home in ZTX!
+          {{ currentDescription.description }}
         </div>
         <div class="nft-info-wrapper">
           <div class="nft-info-title">Price</div>
@@ -276,12 +275,18 @@
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import { ethers } from "ethers";
 
+// Function to fetch descriptions
+import descriptions from "../assets/descriptions.json";
+const currentDescription = computed(
+  () => descriptions[currentIndex.value] || {}
+);
+
+// Smart contract settings
 const nftData = ref([]);
 const currentIndex = ref(0);
 const currentBlockNumber = ref(null);
 const secondsSinceUpdate = ref(0); // Tracks seconds since last block update
 
-// Smart contract settings
 const contractAddress = "0x898b64943D01f2739C4B4cFAD4E16579C3228C35";
 const abi = [
   {
