@@ -159,6 +159,12 @@
             {{ nftData && currentNFT && formatDate(currentNFT.annTime) }}
           </div>
         </div>
+        <div class="nft-info-wrapper">
+          <div class="nft-info-title">Winner</div>
+          <div class="nft-info-details">
+            {{ nftData && currentNFT && currentNFT.winner }}
+          </div>
+        </div>
       </div>
       <!-- top -->
       <button
@@ -339,6 +345,14 @@ const provider = new ethers.JsonRpcProvider(
 const contract = new ethers.Contract(contractAddress, abi, provider);
 
 // NFT Metadata
+const formattedAddress = (address) => {
+  if (address) {
+    return `${address.substring(0, 8)}...${address.substring(
+      address.length - 6
+    )}`;
+  }
+  return "";
+};
 const currentNFT = computed(() => {
   if (
     nftData.value &&
@@ -352,7 +366,10 @@ const currentNFT = computed(() => {
       startTime: nft.startTime,
       endTime: nft.endTime,
       annTime: nft.annTime,
-      winner: nft.winner,
+      winner:
+        nft.winner !== ethers.ZeroAddress
+          ? formattedAddress(nft.winner)
+          : "Perhaps You 🍀🎁",
       candidates: nft.candidates,
     };
   }
