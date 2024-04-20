@@ -5,6 +5,8 @@ import { createRouter, createWebHashHistory } from "vue-router";
 import DrawPage from "./components/DrawPage.vue";
 import ProfilePage from "./components/ProfilePage.vue";
 
+document.title = "LuckyDraw";
+
 const router = createRouter({
     history: createWebHashHistory(),
     routes: [
