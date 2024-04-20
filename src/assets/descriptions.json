@@ -28,5 +28,35 @@
         "id": 3299,
         "price": "99.9989",
         "description": "Step into The Genesis Homes, the foundational NFT collection from ZTX, offering 4,000 unique and customizable in-game assets. Each NFT comes with the privilege of joining one of the ZTX community’s four District sub-DAOs. Find your home and your community at ZTX."
+    },
+    {
+        "id": 3300,
+        "price": "5.5210",
+        "description": "Unlock the doors to The Vertex Vistas, the latest from ZTX's vibrant communities. Each of these 3,000 unique NFTs offers an unparalleled in-game living experience, complete with exclusive access to the Vertex District, a hub for tech and innovation enthusiasts within the ZTX ecosystem."
+    },
+    {
+        "id": 3301,
+        "price": "0.9102",
+        "description": "Embark on an exclusive journey with The Cosmo Condos by ZTX. Limited to 2,500 pieces, these NFTs serve as more than just virtual properties; they are your gateway to the Cosmo District, known for its artsy and cultural engagements in the virtual ZTX world."
+    },
+    {
+        "id": 3302,
+        "price": "3.7890",
+        "description": "Introducing the Harmony Heights collection by ZTX, where each of the 3,500 NFTs doubles as a luxurious digital abode and a ticket to the Harmony District. This area is celebrated for its serene environment and community-focused living, ideal for those seeking tranquility in a digital space."
+    },
+    {
+        "id": 3303,
+        "price": "12.4475",
+        "description": "Step into the Limelight Lofts, ZTX's latest real estate venture in the digital world. With 4,000 NFTs available, each loft provides an opulent in-game residence and exclusive access to the Limelight District, a playground for the creatives and entertainers of ZTX."
+    },
+    {
+        "id": 3304,
+        "price": "7.3356",
+        "description": "Explore the Pinnacle Palaces, a premier collection of 2,000 NFTs by ZTX. These palatial in-game properties are not only architectural marvels but also offer memberships to the Pinnacle District, known for its luxury lifestyle and high society events in the ZTX realm."
+    },
+    {
+        "id": 3305,
+        "price": "15.0022",
+        "description": "Discover the Echo Estates, where each of the 3,000 NFTs is a key to an exclusive estate in the Echo District of ZTX. Known for its innovative sustainability projects, owning in this district offers a blend of luxury and responsible living."
     }
 ]
