@@ -547,9 +547,9 @@ onMounted(async () => {
 
   intervalId = setInterval(async () => {
     secondsSinceUpdate.value += 1;
-    if (secondsSinceUpdate.value >= 60) {
+    if (secondsSinceUpdate.value >= 10) {
       // Timer
-      // Assume block time of roughly 60 seconds for update
+      // Assume block time of roughly 10 seconds for update
       await updateBlockNumber();
       secondsSinceUpdate.value = 0;
 
