@@ -170,10 +170,14 @@
       <button
         class="apply-button"
         @click="buyNFT"
+        v-if="!eligible"
         :class="{ disable: currentNFT.endTime < currentBlockNumber }"
         :disabled="currentNFT.endTime < currentBlockNumber"
       >
         {{ applyLoading }}
+      </button>
+      <button class="apply-button" @click="getNFT" v-if="eligible">
+        {{ getLoading }}
       </button>
     </div>
     <!-- nft-arrow -->
@@ -287,6 +291,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from "vue";
 import { ethers } from "ethers";
+import { computedAsync } from "@vueuse/core";
 
 // Function to fetch descriptions
 import descriptions from "../assets/descriptions.json";
@@ -296,7 +301,7 @@ const currentDescription = computed(
 
 // Smart contract settings
 const nftData = ref([]);
-const currentIndex = ref(0);
+const currentIndex = ref(null);
 const currentBlockNumber = ref(null);
 const secondsSinceUpdate = ref(0); // Tracks seconds since last block update
 
@@ -336,6 +341,19 @@ const abi = [
     stateMutability: "payable",
     type: "function",
   },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256",
+      },
+    ],
+    name: "reward",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
 ];
 
 const provider = new ethers.JsonRpcProvider(
@@ -357,6 +375,7 @@ const currentNFT = computed(() => {
   if (
     nftData.value &&
     nftData.value.length > 0 &&
+    currentIndex.value !== null &&
     currentIndex.value >= 0 &&
     currentIndex.value < nftData.value.length
   ) {
@@ -477,6 +496,47 @@ const buyNFT = async () => {
   }
 };
 
+// Get NFT
+const getLoading = ref("This is for you 🎁");
+const signerAddress = ref(ethers.ZeroAddress);
+
+const eligible = computedAsync(async () => {
+  try {
+    if (
+      nftData.value &&
+      currentIndex.value !== null &&
+      nftData.value[currentIndex.value].winner.toLowerCase() !==
+        ethers.ZeroAddress.toLowerCase() &&
+      nftData.value[currentIndex.value].winner.toLowerCase() ===
+        signerAddress.value.toLowerCase()
+    ) {
+      await contractWithSigner.reward.staticCall(currentIndex.value);
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+}, false);
+
+const getNFT = async () => {
+  if (contractWithSigner) {
+    getLoading.value = "This is for you 💭";
+    try {
+      const tx = await contractWithSigner.reward(currentIndex.value);
+      const res = await tx.wait();
+      // console.log(res.hash);
+      res;
+    } catch (error) {
+      console.error(error);
+    }
+    getLoading.value = "This is for you 🎁";
+  }
+};
+
+// Mount & Unmount
 let intervalId;
 onMounted(async () => {
   await provider.getBlockNumber().then((blockNumber) => {
@@ -495,13 +555,27 @@ onMounted(async () => {
 
       // NFT
       await loadNFTData();
+    } else if (secondsSinceUpdate.value % 5 === 0) {
+      // Provider Settings
+      if (signerAddress.value === ethers.ZeroAddress) {
+        try {
+          const providerWithSigner = new ethers.BrowserProvider(
+            window.ethereum
+          );
+          const signer = await providerWithSigner.getSigner();
+          // console.log("Account:", await signer.getAddress());
+          signerAddress.value = await signer.getAddress();
+          contractWithSigner = new ethers.Contract(
+            contractAddress,
+            abi,
+            signer
+          );
+        } catch (error) {
+          console.error(error);
+        }
+      }
     }
   }, 1000);
-
-  const providerWithSigner = new ethers.BrowserProvider(window.ethereum);
-  const signer = await providerWithSigner.getSigner();
-  // console.log("Account:", await signer.getAddress());
-  contractWithSigner = new ethers.Contract(contractAddress, abi, signer);
 });
 onUnmounted(() => {
   clearInterval(intervalId);
