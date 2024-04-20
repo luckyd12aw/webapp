@@ -3,7 +3,9 @@
   <div class="menu">
     <div class="menu-left">
       <img class="logo-img" src="./assets/logo.png" alt="logo" />
-      <div class="logo-name">LuckyDraw</div>
+      <a href="/draw" class="routerLink">
+        <div class="logo-name">LuckyDraw</div>
+      </a>
       <button class="treasury-button" disabled>
         {{ treasuryBalance }}
       </button>
@@ -168,6 +170,10 @@ const handleMouseLeave = () => {
 </script>
 
 <style>
+.routerLink {
+  text-decoration: none;
+}
+
 /* menu */
 .menu {
   display: flex;
