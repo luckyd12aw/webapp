@@ -430,8 +430,10 @@ const calculateTimeFromBlock = (blockNumber) => {
     return `End`;
   }
 
-  const secondsAway =
-    ethers.toNumber(blocksAway) * 0.2 - secondsSinceUpdate.value;
+  let secondsAway = ethers.toNumber(blocksAway) * 0.2;
+  if (secondsAway - secondsSinceUpdate.value >= 0) {
+    secondsAway -= secondsSinceUpdate.value;
+  }
   const hours = Math.floor(secondsAway / 3600);
   const minutes = Math.floor((secondsAway % 3600) / 60);
   const seconds = Math.floor(secondsAway % 60);
