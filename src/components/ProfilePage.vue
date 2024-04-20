@@ -75,7 +75,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, computed } from "vue";
 import { ethers } from "ethers";
 import descriptions from "../assets/descriptions.json";
 
@@ -138,13 +138,26 @@ let contractWithSigner;
 const signerAddress = ref(ethers.ZeroAddress);
 
 // NFTs
-const nfts = ref([]);
+// Reactive state for NFTs
+const rawNfts = ref([]);
+
+// Computed property for NFTs
+const nfts = computed(() => {
+  return rawNfts.value.map((nft) => ({
+    ...nft,
+    price: descriptions[nft.tokenId]?.price || "0.0000",
+    description:
+      descriptions[nft.tokenId]?.description || "No description available",
+    isClaimed: nft.isClaimed,
+  }));
+});
+
 const getLoading = ref("Claim 🎁");
 
+// TODO: multicall
 async function fetchNFTData() {
   const allMetadata = await contractWithSigner.allMetadata();
   const signerNfts = [];
-
   for (const [idx, nft] of allMetadata.entries()) {
     if (nft.winner.toLowerCase() === signerAddress.value.toLowerCase()) {
       const isClaimed = await (async () => {
@@ -155,10 +168,9 @@ async function fetchNFTData() {
           return true;
         }
       })();
-
       signerNfts.push({
         tokenId: idx,
-        price: nft.price,
+        price: nft.price, // Assume this comes from contract directly if needed
         startTime: nft.startTime,
         endTime: nft.endTime,
         annTime: nft.annTime,
@@ -168,8 +180,7 @@ async function fetchNFTData() {
       });
     }
   }
-  nfts.value = signerNfts;
-  console.log(nfts.value);
+  rawNfts.value = signerNfts;
 }
 
 const getNFT = async (tokenId) => {
@@ -178,13 +189,19 @@ const getNFT = async (tokenId) => {
     try {
       const tx = await contractWithSigner.reward(tokenId);
       const res = await tx.wait();
-      // console.log(res.hash);
       res;
+      // After transaction is confirmed
+      getLoading.value = "Claim 🎁";
+      const updatedIndex = rawNfts.value.findIndex(
+        (nft) => nft.tokenId === tokenId
+      );
+      if (updatedIndex !== -1) {
+        rawNfts.value[updatedIndex].isClaimed = true;
+      }
     } catch (error) {
       console.error(error);
+      getLoading.value = "Claim 🎁";
     }
-    getLoading.value = "Claim 🎁";
-    nfts.value.isClaimed = true;
   }
 };
 
