@@ -48,6 +48,16 @@ const treasuryBalance = ref("Loading...");
 
 onMounted(async () => {
   await loadBalance();
+
+  try {
+    const providerWithSigner = new ethers.BrowserProvider(window.ethereum);
+    const signer = await providerWithSigner.getSigner();
+    // console.log("Account:", await signer.getAddress());
+    userAddress.value = await signer.getAddress();
+    isConnected.value = true;
+  } catch (error) {
+    console.error(error);
+  }
 });
 
 async function loadBalance() {

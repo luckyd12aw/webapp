@@ -451,7 +451,8 @@ const buyNFT = async () => {
         value: ethers.parseEther(currentNFT.value.price),
       });
       const res = await tx.wait();
-      console.log(res.hash);
+      // console.log(res.hash);
+      res;
     } catch (error) {
       console.error(error);
     }
