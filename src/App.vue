@@ -11,28 +11,40 @@
       </button>
     </div>
     <div class="menu-right">
-      <router-link
-        to="/draw"
-        :class="{
-          'menu-draw-button': true,
-          active: $route.path === '/draw' || $route.path === '/',
-        }"
-        >Draw</router-link
-      >
-      <router-link
-        to="/profile"
-        :class="{
-          'menu-profile-button': true,
-          active: $route.path === '/profile',
-        }"
-        >Profile</router-link
-      >
-      <button
-        class="wallet-button"
-        @click="connectWallet"
-        @mouseenter="handleMouseEnter"
-        @mouseleave="handleMouseLeave"
-      >
+
+      <div class="network-container">
+        <img class="select-image" src="./assets/arb.png" alt="Select Network" @click="toggleModal" />
+
+        <div v-if="showModal" class="modal">
+          <div class="modal-content">
+            <span class="close" @click="toggleModal">&times;</span>
+            <h2>Select Network</h2>
+            <button class="modal-select-button" @click="toggleModal">
+              <img class="modal-select-image" src="./assets/arb.png" />
+            </button>
+            <button class="modal-select-button" @click="toggleModal">
+              <img class="modal-select-image" src="./assets/avail.png" />
+            </button>
+            <button class="modal-select-button" @click="toggleModal">
+              <img class="modal-select-image" src="./assets/neon.png" />
+            </button>
+            <button class="modal-select-button" @click="toggleModal">
+              <img class="modal-select-image" src="./assets/morph.svg" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <router-link to="/draw" :class="{
+        'menu-draw-button': true,
+        active: $route.path === '/draw' || $route.path === '/',
+      }">Draw</router-link>
+      <router-link to="/profile" :class="{
+        'menu-profile-button': true,
+        active: $route.path === '/profile',
+      }">Profile</router-link>
+      <button class="wallet-button" @click="connectWallet" @mouseenter="handleMouseEnter"
+        @mouseleave="handleMouseLeave">
         {{ buttonLabel }}
       </button>
     </div>
@@ -44,6 +56,12 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { ethers } from "ethers";
+
+const showModal = ref(false);
+
+function toggleModal() {
+  showModal.value = !showModal.value;
+}
 
 // Treasury
 const treasuryBalance = ref("Loading...");
@@ -170,6 +188,62 @@ const handleMouseLeave = () => {
 </script>
 
 <style>
+.network-container {
+  margin-right: 14px;
+}
+
+.select-image {
+  width: 36px;
+  cursor: pointer;
+}
+
+.modal-select-button {
+  border-color: transparent;
+  background-color: transparent;
+
+  margin-right: 10px;
+  margin-bottom: 20px;
+}
+
+.modal-select-button:last-child {
+  margin-right: 0px;
+}
+
+.modal-select-image {
+  width: 60px;
+  cursor: pointer;
+}
+
+.modal-content {
+  position: fixed;
+  top: 400px;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 260px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal {
+  position: fixed;
+  left: 0;
+  top: 0px;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 1000;
+}
+
+.close {
+  float: right;
+  font-size: 28px;
+  cursor: pointer;
+}
+
 .routerLink {
   text-decoration: none;
 }
@@ -220,6 +294,7 @@ const handleMouseLeave = () => {
 
   color: white;
 }
+
 .treasury-button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
@@ -258,7 +333,9 @@ body {
 
   color: white;
 }
+
 .wallet-button:hover {
-  background-color: #c67c00; /* Darken the button color slightly on hover */
+  background-color: #c67c00;
+  /* Darken the button color slightly on hover */
 }
 </style>
