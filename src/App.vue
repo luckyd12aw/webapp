@@ -110,22 +110,58 @@ function toggleModal() {
 const treasuryBalance = ref("Loading...");
 
 onMounted(async () => {
-  await loadBalance();
-
   // Connect wallet if not already connected
   if (!isConnected.value) {
     await connectWallet();
   }
+
+  await loadBalance();
 });
 
-async function loadBalance() {
-  const contractAddress = "0x0CFADaB77eC10CB761E11ed15E99d1e117B25769";
-  const provider = new ethers.JsonRpcProvider(
-    "https://arbitrum-sepolia.blockpi.network/v1/rpc/public"
-  );
+async function getChainId() {
+  if (window.ethereum) {
+    try {
+      const chainId = await window.ethereum.request({ method: "eth_chainId" });
+      return chainId;
+    } catch (error) {
+      console.error("Failed to get chain ID:", error);
+    }
+  }
+  // else {
+  //   alert(
+  //     "Ethereum provider (e.g., MetaMask) not found. Please install it to use this feature."
+  //   );
+  // }
+}
 
+const chainName = ref("arb");
+const contractAddress = ref("0x10a04C6DD2b65a09839Fad31BA4818D60423d6C6");
+const provider = ref("https://arbitrum-sepolia.blockpi.network/v1/rpc/public");
+
+async function loadBalance() {
+  const chainId = await getChainId();
+  if (chainId == "0x2f2019c144") {
+    chainName.value = "avail";
+    contractAddress.value = "0x40e86969a34325319Ad41995158aD8B2333824Dd";
+    provider.value = "https://op-avail-sepolia.alt.technology/";
+  } else if (chainId == "0xe9ac0ce") {
+    chainName.value = "neon";
+    contractAddress.value = "0x29b8086DC9CFD893Aba9AAdaD82491dBCb431910";
+    provider.value = "https://devnet.neonevm.org";
+  } else if (chainId == "0xa96") {
+    chainName.value = "morph";
+    contractAddress.value = "0x16eDa3Fca8c4509B7D131A3D7bE7097EC990F578";
+    provider.value = "https://rpc-testnet.morphl2.io";
+  } else {
+    // if (chainId == "0x66eee") {
+    chainName.value = "arb";
+    contractAddress.value = "0x10a04C6DD2b65a09839Fad31BA4818D60423d6C6";
+    provider.value = "https://arbitrum-sepolia.blockpi.network/v1/rpc/public";
+  }
+
+  const _provider = new ethers.JsonRpcProvider(provider.value);
   try {
-    const balance = await provider.getBalance(contractAddress);
+    const balance = await _provider.getBalance(contractAddress.value);
     const balanceInEth = ethers.formatEther(balance);
     treasuryBalance.value = `Treasury ${balanceInEth} ETH`;
   } catch (error) {
@@ -229,6 +265,7 @@ const handleNetworkChange = async (chainId, chainName, image) => {
       params: [{ chainId: chainId }],
     });
     selectedNetworkImage.value = image;
+    await loadBalance();
   } catch (error) {
     if (error.code === 4902) {
       // Chain not found, need to add it

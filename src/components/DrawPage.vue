@@ -87,10 +87,7 @@
         <div class="nft-title-container">
           <img class="arb-img" src="../assets/networks/arb.png" alt="arb" />
           <div class="nft-text">LuckyDraw #{{ nftData && currentIndex }}</div>
-          <a
-            target="_blank"
-            href="https://sepolia.arbiscan.io/address/0x0CFADaB77eC10CB761E11ed15E99d1e117B25769"
-          >
+          <a target="_blank" :href="explorer">
             <button class="website-button">
               <svg
                 width="25"
@@ -116,7 +113,7 @@
           </a>
         </div>
         <!-- TODO: get image from the server -->
-        <img class="nft-img" src="../assets/nfts/0.jpeg" alt="nft" />
+        <img class="nft-img" :src="imagePath" alt="nft" />
       </div>
       <!-- mid -->
       <div class="time-text">
@@ -295,8 +292,12 @@ import { computedAsync } from "@vueuse/core";
 
 // Function to fetch descriptions
 import descriptions from "../assets/nfts/descriptions.json";
+const filteredDescriptions = computed(() => {
+  return descriptions.filter((item) => item.chain === chainName.value);
+});
+
 const currentDescription = computed(
-  () => descriptions[currentIndex.value] || {}
+  () => filteredDescriptions.value[currentIndex.value] || {}
 );
 
 // Smart contract settings
@@ -305,7 +306,13 @@ const currentIndex = ref(null);
 const currentBlockNumber = ref(null);
 const secondsSinceUpdate = ref(0); // Tracks seconds since last block update
 
-const contractAddress = "0x0CFADaB77eC10CB761E11ed15E99d1e117B25769";
+const provider = ref("https://arbitrum-sepolia.blockpi.network/v1/rpc/public");
+const contractAddress = ref("0x10a04C6DD2b65a09839Fad31BA4818D60423d6C6");
+const explorer = ref(
+  "https://sepolia.arbiscan.io/address/0x10a04C6DD2b65a09839Fad31BA4818D60423d6C6"
+);
+const blockInterval = ref(0.2);
+
 const abi = [
   {
     inputs: [],
@@ -356,11 +363,33 @@ const abi = [
   },
 ];
 
-const provider = new ethers.JsonRpcProvider(
-  "https://arbitrum-sepolia.blockpi.network/v1/rpc/public"
-);
-
-const contract = new ethers.Contract(contractAddress, abi, provider);
+import image0 from "@/assets/nfts/0.jpeg";
+import image1 from "@/assets/nfts/1.jpeg";
+import image2 from "@/assets/nfts/2.jpeg";
+import image3 from "@/assets/nfts/3.jpeg";
+import image4 from "@/assets/nfts/4.jpeg";
+import image5 from "@/assets/nfts/5.jpeg";
+import image6 from "@/assets/nfts/6.jpeg";
+import image7 from "@/assets/nfts/7.jpeg";
+import image8 from "@/assets/nfts/8.jpeg";
+import image9 from "@/assets/nfts/9.jpeg";
+import image10 from "@/assets/nfts/10.jpeg";
+import image11 from "@/assets/nfts/11.jpeg";
+const imagePath = computed(() => {
+  if (currentDescription.value.idx == 0) return image0;
+  if (currentDescription.value.idx == 1) return image1;
+  if (currentDescription.value.idx == 2) return image2;
+  if (currentDescription.value.idx == 3) return image3;
+  if (currentDescription.value.idx == 4) return image4;
+  if (currentDescription.value.idx == 5) return image5;
+  if (currentDescription.value.idx == 6) return image6;
+  if (currentDescription.value.idx == 7) return image7;
+  if (currentDescription.value.idx == 8) return image8;
+  if (currentDescription.value.idx == 9) return image9;
+  if (currentDescription.value.idx == 10) return image10;
+  if (currentDescription.value.idx == 11) return image11;
+  return image0;
+});
 
 // NFT Metadata
 const formattedAddress = (address) => {
@@ -397,6 +426,9 @@ const currentNFT = computed(() => {
 
 const loadNFTData = async () => {
   try {
+    const _provider = new ethers.JsonRpcProvider(provider.value);
+    const contract = new ethers.Contract(contractAddress.value, abi, _provider);
+
     const data = await contract.allMetadata();
     if (data.length === 0) {
       throw new Error("No NFTs found.");
@@ -420,7 +452,8 @@ const previousNFT = () => {
 };
 
 const updateBlockNumber = async () => {
-  currentBlockNumber.value = await provider.getBlockNumber();
+  const _provider = new ethers.JsonRpcProvider(provider.value);
+  currentBlockNumber.value = await _provider.getBlockNumber();
 };
 
 const calculateTimeFromBlock = (blockNumber) => {
@@ -430,7 +463,7 @@ const calculateTimeFromBlock = (blockNumber) => {
     return `End`;
   }
 
-  let secondsAway = ethers.toNumber(blocksAway) * 0.2;
+  let secondsAway = ethers.toNumber(blocksAway) * blockInterval.value;
   if (secondsAway - secondsSinceUpdate.value >= 0) {
     secondsAway -= secondsSinceUpdate.value;
   }
@@ -444,7 +477,8 @@ const formatDate = (blockNumber) => {
   if (!currentBlockNumber.value || !blockNumber) return "Loading...";
   const blocksAway = blockNumber - ethers.toBigInt(currentBlockNumber.value);
   const secondsAway =
-    ethers.toNumber(blocksAway) * 0.2 - secondsSinceUpdate.value;
+    ethers.toNumber(blocksAway) * blockInterval.value -
+    secondsSinceUpdate.value;
 
   const date = new Date(Date.now() + secondsAway * 1000);
   return date.toLocaleDateString("en-US", {
@@ -459,10 +493,12 @@ const formatApplicationPeriod = (startBlock, endBlock) => {
     return "Loading...";
   const startBlockAway = startBlock - ethers.toBigInt(currentBlockNumber.value);
   const startBlocksecondsAway =
-    ethers.toNumber(startBlockAway) * 0.2 - secondsSinceUpdate.value;
+    ethers.toNumber(startBlockAway) * blockInterval.value -
+    secondsSinceUpdate.value;
   const endBlockAway = endBlock - ethers.toBigInt(currentBlockNumber.value);
   const endBlocksecondsAway =
-    ethers.toNumber(endBlockAway) * 0.2 - secondsSinceUpdate.value;
+    ethers.toNumber(endBlockAway) * blockInterval.value -
+    secondsSinceUpdate.value;
 
   const startDate = new Date(Date.now() + startBlocksecondsAway * 1000);
   const endDate = new Date(Date.now() + endBlocksecondsAway * 1000);
@@ -480,6 +516,8 @@ const formatApplicationPeriod = (startBlock, endBlock) => {
 // Buy
 const applyLoading = ref("Apply");
 let contractWithSigner;
+let chainId;
+const chainName = ref("arb");
 
 const buyNFT = async () => {
   if (contractWithSigner) {
@@ -541,13 +579,53 @@ const getNFT = async () => {
 // Mount & Unmount
 let intervalId;
 onMounted(async () => {
-  await provider.getBlockNumber().then((blockNumber) => {
+  const _provider = new ethers.JsonRpcProvider(provider.value);
+  await _provider.getBlockNumber().then((blockNumber) => {
     currentBlockNumber.value = blockNumber;
   });
+
   await loadNFTData();
   currentIndex.value = nftData.value.length - 1;
 
   intervalId = setInterval(async () => {
+    const prevChainId = chainId;
+    chainId = await getChainId();
+    if (chainId == "0x2f2019c144") {
+      chainName.value = "avail";
+      contractAddress.value = "0x40e86969a34325319Ad41995158aD8B2333824Dd";
+      provider.value = "https://op-avail-sepolia.alt.technology/";
+      blockInterval.value = 10;
+      explorer.value =
+        "https://op-avail-sepolia-explorer.alt.technology/address/0x40e86969a34325319Ad41995158aD8B2333824Dd?tab=contract";
+    } else if (chainId == "0xe9ac0ce") {
+      chainName.value = "neon";
+      contractAddress.value = "0x29b8086DC9CFD893Aba9AAdaD82491dBCb431910";
+      provider.value = "https://devnet.neonevm.org";
+      blockInterval.value = 10;
+      explorer.value =
+        "https://devnet.neonscan.org/address/0x29b8086DC9CFD893Aba9AAdaD82491dBCb431910";
+    } else if (chainId == "0xa96") {
+      chainName.value = "morph";
+      contractAddress.value = "0x16eDa3Fca8c4509B7D131A3D7bE7097EC990F578";
+      provider.value = "https://rpc-testnet.morphl2.io";
+      blockInterval.value = 0.4;
+      explorer.value =
+        "https://explorer-testnet.morphl2.io/address/0x16eDa3Fca8c4509B7D131A3D7bE7097EC990F578";
+    } else {
+      // if (chainId == "0x66eee") {
+      chainName.value = "arb";
+      contractAddress.value = "0x10a04C6DD2b65a09839Fad31BA4818D60423d6C6";
+      provider.value = "https://arbitrum-sepolia.blockpi.network/v1/rpc/public";
+      blockInterval.value = 0.2;
+      explorer.value =
+        "https://sepolia.arbiscan.io/address/0x10a04C6DD2b65a09839Fad31BA4818D60423d6C6";
+    }
+
+    if (prevChainId != chainId) {
+      await loadNFTData();
+      currentIndex.value = nftData.value.length - 1;
+    }
+
     secondsSinceUpdate.value += 1;
     if (secondsSinceUpdate.value >= 10) {
       // Timer
@@ -568,7 +646,7 @@ onMounted(async () => {
           // console.log("Account:", await signer.getAddress());
           signerAddress.value = await signer.getAddress();
           contractWithSigner = new ethers.Contract(
-            contractAddress,
+            contractAddress.value,
             abi,
             signer
           );
@@ -579,6 +657,23 @@ onMounted(async () => {
     }
   }, 1000);
 });
+
+async function getChainId() {
+  if (window.ethereum) {
+    try {
+      const chainId = await window.ethereum.request({ method: "eth_chainId" });
+      return chainId;
+    } catch (error) {
+      console.error("Failed to get chain ID:", error);
+    }
+  }
+  // else {
+  //   alert(
+  //     "Ethereum provider (e.g., MetaMask) not found. Please install it to use this feature."
+  //   );
+  // }
+}
+
 onUnmounted(() => {
   clearInterval(intervalId);
 });

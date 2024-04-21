@@ -34,7 +34,7 @@
             </div>
             <a
               target="_blank"
-              href="https://sepolia.arbiscan.io/address/0x0CFADaB77eC10CB761E11ed15E99d1e117B25769"
+              href="https://sepolia.arbiscan.io/address/0x10a04C6DD2b65a09839Fad31BA4818D60423d6C6"
             >
               <button class="my-website-button">
                 <svg
@@ -71,7 +71,7 @@
               }}
             </div>
           </div>
-          <img class="my-nft-img" src="../assets/nfts/0.jpeg" alt="" />
+          <img class="my-nft-img" :src="getImagePath(nft.idx)" alt="" />
         </div>
       </div>
     </div>
@@ -81,9 +81,20 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { ethers } from "ethers";
-import descriptions from "../assets/nfts/descriptions.json";
 
-const contractAddress = "0x0CFADaB77eC10CB761E11ed15E99d1e117B25769";
+let chainId;
+const chainName = ref("arb");
+const provider = ref("https://arbitrum-sepolia.blockpi.network/v1/rpc/public");
+const contractAddress = ref("0x10a04C6DD2b65a09839Fad31BA4818D60423d6C6");
+const explorer = ref(
+  "https://sepolia.arbiscan.io/address/0x10a04C6DD2b65a09839Fad31BA4818D60423d6C6"
+);
+
+import descriptions from "../assets/nfts/descriptions.json";
+const filteredDescriptions = computed(() => {
+  return descriptions.filter((item) => item.chain === chainName.value);
+});
+
 const abi = [
   {
     inputs: [],
@@ -134,6 +145,36 @@ const abi = [
   },
 ];
 
+import image0 from "@/assets/nfts/0.jpeg";
+import image1 from "@/assets/nfts/1.jpeg";
+import image2 from "@/assets/nfts/2.jpeg";
+import image3 from "@/assets/nfts/3.jpeg";
+import image4 from "@/assets/nfts/4.jpeg";
+import image5 from "@/assets/nfts/5.jpeg";
+import image6 from "@/assets/nfts/6.jpeg";
+import image7 from "@/assets/nfts/7.jpeg";
+import image8 from "@/assets/nfts/8.jpeg";
+import image9 from "@/assets/nfts/9.jpeg";
+import image10 from "@/assets/nfts/10.jpeg";
+import image11 from "@/assets/nfts/11.jpeg";
+
+const getImagePath = (idx) => {
+  console.log(idx);
+  if (idx == 0) return image0;
+  if (idx == 1) return image1;
+  if (idx == 2) return image2;
+  if (idx == 3) return image3;
+  if (idx == 4) return image4;
+  if (idx == 5) return image5;
+  if (idx == 6) return image6;
+  if (idx == 7) return image7;
+  if (idx == 8) return image8;
+  if (idx == 9) return image9;
+  if (idx == 10) return image10;
+  if (idx == 11) return image11;
+  return image0;
+};
+
 // const provider = new ethers.JsonRpcProvider(
 //   "https://arbitrum-sepolia.blockpi.network/v1/rpc/public"
 // );
@@ -149,10 +190,12 @@ const rawNfts = ref([]);
 const nfts = computed(() => {
   return rawNfts.value.map((nft) => ({
     ...nft,
-    price: descriptions[nft.tokenId]?.price || "0.0000",
+    price: filteredDescriptions.value[nft.tokenId]?.price || "0.0000",
     description:
-      descriptions[nft.tokenId]?.description || "No description available",
+      filteredDescriptions.value[nft.tokenId]?.description ||
+      "No description available",
     isClaimed: nft.isClaimed,
+    idx: filteredDescriptions.value[nft.tokenId]?.idx || 0,
   }));
 });
 
@@ -160,31 +203,33 @@ const getLoading = ref("Claim 🎁");
 
 // TODO: multicall
 async function fetchNFTData() {
-  const allMetadata = await contractWithSigner.allMetadata();
-  const signerNfts = [];
-  for (const [idx, nft] of allMetadata.entries()) {
-    if (nft.winner.toLowerCase() === signerAddress.value.toLowerCase()) {
-      const isClaimed = await (async () => {
-        try {
-          await contractWithSigner.reward.staticCall(idx);
-          return false;
-        } catch (error) {
-          return true;
-        }
-      })();
-      signerNfts.push({
-        tokenId: idx,
-        price: nft.price, // Assume this comes from contract directly if needed
-        startTime: nft.startTime,
-        endTime: nft.endTime,
-        annTime: nft.annTime,
-        winner: nft.winner,
-        candidates: nft.candidates,
-        isClaimed: isClaimed,
-      });
+  if (contractWithSigner) {
+    const allMetadata = await contractWithSigner.allMetadata();
+    const signerNfts = [];
+    for (const [idx, nft] of allMetadata.entries()) {
+      if (nft.winner.toLowerCase() === signerAddress.value.toLowerCase()) {
+        const isClaimed = await (async () => {
+          try {
+            await contractWithSigner.reward.staticCall(idx);
+            return false;
+          } catch (error) {
+            return true;
+          }
+        })();
+        signerNfts.push({
+          tokenId: idx,
+          price: nft.price, // Assume this comes from contract directly if needed
+          startTime: nft.startTime,
+          endTime: nft.endTime,
+          annTime: nft.annTime,
+          winner: nft.winner,
+          candidates: nft.candidates,
+          isClaimed: isClaimed,
+        });
+      }
     }
+    rawNfts.value = signerNfts;
   }
-  rawNfts.value = signerNfts;
 }
 
 const getNFT = async (tokenId) => {
@@ -209,39 +254,77 @@ const getNFT = async (tokenId) => {
   }
 };
 
+async function getChainId() {
+  if (window.ethereum) {
+    try {
+      const chainId = await window.ethereum.request({ method: "eth_chainId" });
+      return chainId;
+    } catch (error) {
+      console.error("Failed to get chain ID:", error);
+    }
+  }
+  // else {
+  //   alert(
+  //     "Ethereum provider (e.g., MetaMask) not found. Please install it to use this feature."
+  //   );
+  // }
+}
+
 // Mount & Unmount
 let intervalId;
 onMounted(async () => {
-  // First try
-  try {
-    const providerWithSigner = new ethers.BrowserProvider(window.ethereum);
-    const signer = await providerWithSigner.getSigner();
-    // console.log("Account:", await signer.getAddress());
-    signerAddress.value = await signer.getAddress();
-    contractWithSigner = new ethers.Contract(contractAddress, abi, signer);
-
-    await fetchNFTData();
-  } catch (error) {
-    console.error(error);
-  }
-
-  // Try ...
   intervalId = setInterval(async () => {
     // Provider Settings
-    if (signerAddress.value === ethers.ZeroAddress) {
-      try {
-        const providerWithSigner = new ethers.BrowserProvider(window.ethereum);
-        const signer = await providerWithSigner.getSigner();
-        // console.log("Account:", await signer.getAddress());
-        signerAddress.value = await signer.getAddress();
-        contractWithSigner = new ethers.Contract(contractAddress, abi, signer);
 
-        await fetchNFTData();
-      } catch (error) {
-        console.error(error);
-      }
+    const prevChainId = chainId;
+    chainId = await getChainId();
+    if (chainId == "0x2f2019c144") {
+      chainName.value = "avail";
+      contractAddress.value = "0x40e86969a34325319Ad41995158aD8B2333824Dd";
+      provider.value = "https://op-avail-sepolia.alt.technology/";
+      explorer.value =
+        "https://op-avail-sepolia-explorer.alt.technology/address/0x40e86969a34325319Ad41995158aD8B2333824Dd?tab=contract";
+    } else if (chainId == "0xe9ac0ce") {
+      chainName.value = "neon";
+      contractAddress.value = "0x29b8086DC9CFD893Aba9AAdaD82491dBCb431910";
+      provider.value = "https://devnet.neonevm.org";
+      explorer.value =
+        "https://devnet.neonscan.org/address/0x29b8086DC9CFD893Aba9AAdaD82491dBCb431910";
+    } else if (chainId == "0xa96") {
+      chainName.value = "morph";
+      contractAddress.value = "0x16eDa3Fca8c4509B7D131A3D7bE7097EC990F578";
+      provider.value = "https://rpc-testnet.morphl2.io";
+      explorer.value =
+        "https://explorer-testnet.morphl2.io/address/0x16eDa3Fca8c4509B7D131A3D7bE7097EC990F578";
+    } else {
+      // if (chainId == "0x66eee") {
+      chainName.value = "arb";
+      contractAddress.value = "0x10a04C6DD2b65a09839Fad31BA4818D60423d6C6";
+      provider.value = "https://arbitrum-sepolia.blockpi.network/v1/rpc/public";
+      explorer.value =
+        "https://sepolia.arbiscan.io/address/0x10a04C6DD2b65a09839Fad31BA4818D60423d6C6";
     }
-  }, 5000);
+
+    try {
+      const providerWithSigner = new ethers.BrowserProvider(window.ethereum);
+      const signer = await providerWithSigner.getSigner();
+      // console.log("Account:", await signer.getAddress());
+      signerAddress.value = await signer.getAddress();
+      contractWithSigner = new ethers.Contract(
+        contractAddress.value,
+        abi,
+        signer
+      );
+
+      // await fetchNFTData();
+    } catch (error) {
+      console.error(error);
+    }
+
+    if (prevChainId != chainId) {
+      await fetchNFTData();
+    }
+  }, 1000);
 });
 onUnmounted(() => {
   clearInterval(intervalId);
