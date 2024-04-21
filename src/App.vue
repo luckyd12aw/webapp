@@ -19,13 +19,13 @@
           <div class="modal-content">
             <span class="close" @click="toggleModal">&times;</span>
             <h2>Select Network</h2>
-            <button class="modal-select-button">
+            <button class="modal-select-button" @click="toggleModal">
               <img class="modal-select-image" src="./assets/arb.png" />
             </button>
-            <button class="modal-select-button">
+            <button class="modal-select-button" @click="toggleModal">
               <img class="modal-select-image" src="./assets/avail.png" />
             </button>
-            <button class="modal-select-button">
+            <button class="modal-select-button" @click="toggleModal">
               <img class="modal-select-image" src="./assets/neon.png" />
             </button>
           </div>
