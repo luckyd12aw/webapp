@@ -11,7 +11,7 @@
       <div class="my-nft-wrapper" v-for="nft in nfts" :key="nft.tokenId">
         <div class="my-nft-wrapper">
           <div class="my-nft-price-container">
-            <img class="eth-img" src="../assets/eth.png" alt="eth" />
+            <img class="eth-img" src="../assets/networks/eth.png" alt="eth" />
             <div class="nft-price-text">
               {{
                 (nft.tokenId !== undefined &&
@@ -22,7 +22,11 @@
             </div>
           </div>
           <div class="my-nft-title-container" v-if="nft.isClaimed">
-            <img class="my-arb-img" src="../assets/arb.png" alt="arb" />
+            <img
+              class="my-arb-img"
+              src="../assets/networks/arb.png"
+              alt="arb"
+            />
             <div class="my-nft-text">
               LuckyDraw #{{
                 (nft.tokenId !== undefined && nft.tokenId.toString()) || "-1"
@@ -67,7 +71,7 @@
               }}
             </div>
           </div>
-          <img class="my-nft-img" src="../assets/nft.png" alt="" />
+          <img class="my-nft-img" src="../assets/nfts/0.jpeg" alt="" />
         </div>
       </div>
     </div>
@@ -77,7 +81,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { ethers } from "ethers";
-import descriptions from "../assets/descriptions.json";
+import descriptions from "../assets/nfts/descriptions.json";
 
 const contractAddress = "0x0CFADaB77eC10CB761E11ed15E99d1e117B25769";
 const abi = [

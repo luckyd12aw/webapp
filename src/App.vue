@@ -11,40 +11,77 @@
       </button>
     </div>
     <div class="menu-right">
+      <router-link
+        to="/draw"
+        :class="{
+          'menu-draw-button': true,
+          active: $route.path === '/draw' || $route.path === '/',
+        }"
+        >Draw</router-link
+      >
+      <router-link
+        to="/profile"
+        :class="{
+          'menu-profile-button': true,
+          active: $route.path === '/profile',
+        }"
+        >Profile</router-link
+      >
 
       <div class="network-container">
-        <img class="select-image" src="./assets/arb.png" alt="Select Network" @click="toggleModal" />
+        <img
+          class="select-image"
+          :src="selectedNetworkImage"
+          alt="Select Network"
+          @click="toggleModal"
+        />
 
         <div v-if="showModal" class="modal">
           <div class="modal-content">
             <span class="close" @click="toggleModal">&times;</span>
             <h2>Select Network</h2>
-            <button class="modal-select-button" @click="toggleModal">
-              <img class="modal-select-image" src="./assets/arb.png" />
+            <button
+              class="modal-select-button"
+              @click="handleNetworkChange('0x66eee', 'Arbitrum', arbImage)"
+            >
+              <img class="modal-select-image" src="./assets/networks/arb.png" />
             </button>
-            <button class="modal-select-button" @click="toggleModal">
-              <img class="modal-select-image" src="./assets/avail.png" />
+            <button
+              class="modal-select-button"
+              @click="handleNetworkChange('0x2f2019c144', 'Avail', availImage)"
+            >
+              <img
+                class="modal-select-image"
+                src="./assets/networks/avail.png"
+              />
             </button>
-            <button class="modal-select-button" @click="toggleModal">
-              <img class="modal-select-image" src="./assets/neon.png" />
+            <button
+              class="modal-select-button"
+              @click="handleNetworkChange('0xe9ac0ce', 'Neon', neonImage)"
+            >
+              <img
+                class="modal-select-image"
+                src="./assets/networks/neon.png"
+              />
             </button>
-            <button class="modal-select-button" @click="toggleModal">
-              <img class="modal-select-image" src="./assets/morph.svg" />
+            <button
+              class="modal-select-button"
+              @click="handleNetworkChange('0xa96', 'Morph', morphImage)"
+            >
+              <img
+                class="modal-select-image"
+                src="./assets/networks/morph.svg"
+              />
             </button>
           </div>
         </div>
       </div>
-
-      <router-link to="/draw" :class="{
-        'menu-draw-button': true,
-        active: $route.path === '/draw' || $route.path === '/',
-      }">Draw</router-link>
-      <router-link to="/profile" :class="{
-        'menu-profile-button': true,
-        active: $route.path === '/profile',
-      }">Profile</router-link>
-      <button class="wallet-button" @click="connectWallet" @mouseenter="handleMouseEnter"
-        @mouseleave="handleMouseLeave">
+      <button
+        class="wallet-button"
+        @click="connectWallet"
+        @mouseenter="handleMouseEnter"
+        @mouseleave="handleMouseLeave"
+      >
         {{ buttonLabel }}
       </button>
     </div>
@@ -57,6 +94,12 @@
 import { ref, computed, onMounted } from "vue";
 import { ethers } from "ethers";
 
+import arbImage from "@/assets/networks/arb.png";
+import availImage from "@/assets/networks/avail.png";
+import neonImage from "@/assets/networks/neon.png";
+import morphImage from "@/assets/networks/morph.svg";
+
+const selectedNetworkImage = ref(arbImage);
 const showModal = ref(false);
 
 function toggleModal() {
@@ -69,14 +112,9 @@ const treasuryBalance = ref("Loading...");
 onMounted(async () => {
   await loadBalance();
 
-  try {
-    const providerWithSigner = new ethers.BrowserProvider(window.ethereum);
-    const signer = await providerWithSigner.getSigner();
-    // console.log("Account:", await signer.getAddress());
-    userAddress.value = await signer.getAddress();
-    isConnected.value = true;
-  } catch (error) {
-    console.error(error);
+  // Connect wallet if not already connected
+  if (!isConnected.value) {
+    await connectWallet();
   }
 });
 
@@ -174,6 +212,45 @@ const connectWallet = async () => {
     // Disconnect logic
     userAddress.value = null;
     isConnected.value = false;
+  }
+};
+const handleNetworkChange = async (chainId, chainName, image) => {
+  toggleModal();
+
+  // Connect wallet if not already connected
+  if (!isConnected.value) {
+    await connectWallet();
+  }
+
+  // Switch to the selected network
+  try {
+    await window.ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: chainId }],
+    });
+    selectedNetworkImage.value = image;
+  } catch (error) {
+    if (error.code === 4902) {
+      // Chain not found, need to add it
+      await window.ethereum.request({
+        method: "wallet_addEthereumChain",
+        params: [
+          {
+            chainId: chainId,
+            chainName: chainName,
+            nativeCurrency: {
+              name: "Ether",
+              symbol: "ETH",
+              decimals: 18,
+            },
+            rpcUrls: ["https://your.rpc.url"],
+            blockExplorerUrls: ["https://your.explorer.url"],
+          },
+        ],
+      });
+    } else {
+      console.error("Failed to switch network:", error);
+    }
   }
 };
 

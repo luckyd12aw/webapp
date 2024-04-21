@@ -80,12 +80,12 @@
     <div class="nft-wrapper">
       <div class="nft-top">
         <div class="nft-price-container">
-          <img class="eth-img" src="../assets/eth.png" alt="eth" />
+          <img class="eth-img" src="../assets/networks/eth.png" alt="eth" />
           <!-- get price from the json file -->
           <div class="nft-price-text">{{ currentDescription.price }} ETH</div>
         </div>
         <div class="nft-title-container">
-          <img class="arb-img" src="../assets/arb.png" alt="arb" />
+          <img class="arb-img" src="../assets/networks/arb.png" alt="arb" />
           <div class="nft-text">LuckyDraw #{{ nftData && currentIndex }}</div>
           <a
             target="_blank"
@@ -116,7 +116,7 @@
           </a>
         </div>
         <!-- TODO: get image from the server -->
-        <img class="nft-img" src="../assets/nft.png" alt="nft" />
+        <img class="nft-img" src="../assets/nfts/0.jpeg" alt="nft" />
       </div>
       <!-- mid -->
       <div class="time-text">
@@ -294,7 +294,7 @@ import { ethers } from "ethers";
 import { computedAsync } from "@vueuse/core";
 
 // Function to fetch descriptions
-import descriptions from "../assets/descriptions.json";
+import descriptions from "../assets/nfts/descriptions.json";
 const currentDescription = computed(
   () => descriptions[currentIndex.value] || {}
 );
