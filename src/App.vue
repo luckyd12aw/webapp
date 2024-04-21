@@ -28,6 +28,9 @@
             <button class="modal-select-button" @click="toggleModal">
               <img class="modal-select-image" src="./assets/neon.png" />
             </button>
+            <button class="modal-select-button" @click="toggleModal">
+              <img class="modal-select-image" src="./assets/morph.svg" />
+            </button>
           </div>
         </div>
       </div>
@@ -199,6 +202,7 @@ const handleMouseLeave = () => {
   background-color: transparent;
 
   margin-right: 10px;
+  margin-bottom: 20px;
 }
 
 .modal-select-button:last-child {
